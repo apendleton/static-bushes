@@ -1,6 +1,7 @@
 use num_traits::{ NumOps, AsPrimitive, Bounded, Zero };
 
 #[cfg(test)] mod test;
+#[cfg(test)] mod bench;
 
 #[derive(Debug, PartialEq, Eq)]
 enum IndexVec {
