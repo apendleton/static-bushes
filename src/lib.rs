@@ -239,6 +239,10 @@ impl<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> Flatbush<T> {
             }
         }).filter_map(|x| x)
     }
+
+    pub fn bounds(&self) -> [T; 4] {
+        [self.min_x, self.min_y, self.max_x, self.max_y]
+    }
 }
 
 // binary search for the first value in the array bigger than the given
