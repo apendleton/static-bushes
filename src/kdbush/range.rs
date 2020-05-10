@@ -1,9 +1,15 @@
-use crate::kdbush::{ KDBush, AllowedNumber };
+use crate::kdbush::{AllowedNumber, KDBush};
 
 use genawaiter::rc::Gen;
 
 impl<T: AllowedNumber> KDBush<T> {
-    pub fn search_range<'a>(&'a self, min_x: T, min_y: T, max_x: T, max_y: T) -> impl Iterator<Item = usize> + 'a {
+    pub fn search_range<'a>(
+        &'a self,
+        min_x: T,
+        min_y: T,
+        max_x: T,
+        max_y: T,
+    ) -> impl Iterator<Item = usize> + 'a {
         let mut stack = vec![0, self.ids.len() - 1, 0];
 
         Gen::new(|co| async move {
@@ -20,7 +26,9 @@ impl<T: AllowedNumber> KDBush<T> {
                     for i in left..=right {
                         let x = self.coords[2 * i];
                         let y = self.coords[2 * i + 1];
-                        if x >= min_x && x <= max_x && y >= min_y && y <= max_y { co.yield_(self.ids.get(i) as usize).await; }
+                        if x >= min_x && x <= max_x && y >= min_y && y <= max_y {
+                            co.yield_(self.ids.get(i) as usize).await;
+                        }
                     }
                     continue;
                 }
@@ -31,14 +39,13 @@ impl<T: AllowedNumber> KDBush<T> {
                 // include the middle item if it's in range
                 let x = self.coords[2 * m];
                 let y = self.coords[2 * m + 1];
-                if x >= min_x && x <= max_x && y >= min_y && y <= max_y { co.yield_(self.ids.get(m) as usize).await; }
+                if x >= min_x && x <= max_x && y >= min_y && y <= max_y {
+                    co.yield_(self.ids.get(m) as usize).await;
+                }
 
                 // queue search in halves that intersect the query
-                let (over_min, under_max) = if axis == 0 {
-                    (min_x <= x, max_x >= x)
-                } else {
-                    (min_y <= y, max_y >= y)
-                };
+                let (over_min, under_max) =
+                    if axis == 0 { (min_x <= x, max_x >= x) } else { (min_y <= y, max_y >= y) };
 
                 if over_min {
                     stack.push(left);
@@ -51,6 +58,7 @@ impl<T: AllowedNumber> KDBush<T> {
                     stack.push(1 - axis);
                 }
             }
-        }).into_iter()
+        })
+        .into_iter()
     }
 }

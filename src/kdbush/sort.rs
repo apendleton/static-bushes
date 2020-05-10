@@ -1,7 +1,16 @@
-use crate::{ kdbush::AllowedNumber, util::IndexVec };
+use crate::{kdbush::AllowedNumber, util::IndexVec};
 
-pub fn sort_kd<T: AllowedNumber>(ids: &mut IndexVec, coords: &mut [T], node_size: usize, left: usize, right: usize, axis: usize) {
-    if right - left <= node_size { return; }
+pub fn sort_kd<T: AllowedNumber>(
+    ids: &mut IndexVec,
+    coords: &mut [T],
+    node_size: usize,
+    left: usize,
+    right: usize,
+    axis: usize,
+) {
+    if right - left <= node_size {
+        return;
+    }
 
     let m = (left + right) >> 1; // middle index
 
@@ -16,8 +25,14 @@ pub fn sort_kd<T: AllowedNumber>(ids: &mut IndexVec, coords: &mut [T], node_size
 
 // custom Floyd-Rivest selection algorithm: sort ids and coords so that
 // [left..k-1] items are smaller than k-th item (on either x or y axis)
-fn select<T: AllowedNumber>(ids: &mut IndexVec, coords: &mut [T], k: usize, mut left: usize, mut right: usize, axis: usize) {
-
+fn select<T: AllowedNumber>(
+    ids: &mut IndexVec,
+    coords: &mut [T],
+    k: usize,
+    mut left: usize,
+    mut right: usize,
+    axis: usize,
+) {
     while right > left {
         if right - left > 600 {
             let n = (right - left + 1) as f64;
@@ -26,7 +41,8 @@ fn select<T: AllowedNumber>(ids: &mut IndexVec, coords: &mut [T], k: usize, mut 
 
             let z = n.ln();
             let s = 0.5 * (2.0 * z / 3.0).exp();
-            let sd = 0.5 * (z * s * (n - s) / n).sqrt() * (if m - n / 2.0 < 0.0 { -1.0 } else { 1.0 });
+            let sd =
+                0.5 * (z * s * (n - s) / n).sqrt() * (if m - n / 2.0 < 0.0 { -1.0 } else { 1.0 });
             let new_left = max(left, (fk - m * s / n + sd).floor() as usize);
             let new_right = min(right, (fk + (n - m) * s / n + sd).floor() as usize);
             select(ids, coords, k, new_left, new_right, axis);
@@ -37,14 +53,20 @@ fn select<T: AllowedNumber>(ids: &mut IndexVec, coords: &mut [T], k: usize, mut 
         let mut j = right;
 
         swap_item(ids, coords, left, k);
-        if coords[2 * right + axis] > t { swap_item(ids, coords, left, right); }
+        if coords[2 * right + axis] > t {
+            swap_item(ids, coords, left, right);
+        }
 
         while i < j {
             swap_item(ids, coords, i, j);
             i += 1;
             j -= 1;
-            while coords[2 * i + axis] < t { i+= 1 };
-            while coords[2 * j + axis] > t { j-= 1 };
+            while coords[2 * i + axis] < t {
+                i += 1
+            }
+            while coords[2 * j + axis] > t {
+                j -= 1
+            }
         }
 
         if coords[2 * left + axis] == t {
@@ -54,8 +76,12 @@ fn select<T: AllowedNumber>(ids: &mut IndexVec, coords: &mut [T], k: usize, mut 
             swap_item(ids, coords, j, right);
         }
 
-        if j <= k { left = j + 1; }
-        if k <= j { right = j - 1; }
+        if j <= k {
+            left = j + 1;
+        }
+        if k <= j {
+            right = j - 1;
+        }
     }
 }
 

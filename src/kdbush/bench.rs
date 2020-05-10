@@ -1,11 +1,11 @@
 use crate::kdbush::*;
 
+use std::any::{type_name, Any};
 use std::time::Instant;
-use std::any::{Any, type_name};
 
+use crate::flatbush::{AllowedNumber as FBAllowedNumber, FlatBush};
+use num_traits::{AsPrimitive, FromPrimitive};
 use rand::Rng;
-use num_traits::{FromPrimitive, AsPrimitive};
-use crate::flatbush::{FlatBush, AllowedNumber as FBAllowedNumber};
 
 fn random_val<T: FromPrimitive + AsPrimitive<f64>>(max: f64) -> T {
     let mut rng = rand::thread_rng();
@@ -18,16 +18,25 @@ fn random_point<T: FromPrimitive + AsPrimitive<f64>>(max: f64) -> [T; 2] {
 
 use once_cell::sync::Lazy;
 
-static POINTS_U32: Lazy<Vec<[u32; 2]>> = Lazy::new(|| (0..1000000).map(|_| random_point(1000.0)).collect());
-static POINTS_F64: Lazy<Vec<[f64; 2]>> = Lazy::new(|| (0..1000000).map(|_| random_point(1000.0)).collect());
+static POINTS_U32: Lazy<Vec<[u32; 2]>> =
+    Lazy::new(|| (0..1000000).map(|_| random_point(1000.0)).collect());
+static POINTS_F64: Lazy<Vec<[f64; 2]>> =
+    Lazy::new(|| (0..1000000).map(|_| random_point(1000.0)).collect());
 
 static KDBUSH_U32: Lazy<KDBush<u32>> = Lazy::new(|| POINTS_U32.iter().collect());
 static KDBUSH_F64: Lazy<KDBush<f64>> = Lazy::new(|| POINTS_F64.iter().collect());
 
-static FLATBUSH_U32: Lazy<FlatBush<u32>> = Lazy::new(|| POINTS_U32.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
-static FLATBUSH_F64: Lazy<FlatBush<f64>> = Lazy::new(|| POINTS_F64.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
+static FLATBUSH_U32: Lazy<FlatBush<u32>> = Lazy::new(|| {
+    POINTS_U32.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect()
+});
+static FLATBUSH_F64: Lazy<FlatBush<f64>> = Lazy::new(|| {
+    POINTS_F64.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect()
+});
 
-fn time<F>(name: &str, f: F) where F: Fn() -> () {
+fn time<F>(name: &str, f: F)
+where
+    F: Fn() -> (),
+{
     let now = Instant::now();
     f();
     let elapsed = now.elapsed().as_secs_f64();
@@ -37,25 +46,33 @@ fn time<F>(name: &str, f: F) where F: Fn() -> () {
 #[test]
 #[ignore]
 fn build_kdbush_u32() {
-    time("build u32 kdbush", || { Lazy::force(&KDBUSH_U32); });
+    time("build u32 kdbush", || {
+        Lazy::force(&KDBUSH_U32);
+    });
 }
 
 #[test]
 #[ignore]
 fn build_kdbush_f64() {
-    time("build f64 kdbush", || { Lazy::force(&KDBUSH_F64); });
+    time("build f64 kdbush", || {
+        Lazy::force(&KDBUSH_F64);
+    });
 }
 
 #[test]
 #[ignore]
 fn build_flatbush_u32() {
-    time("build u32 flatbush", || { Lazy::force(&FLATBUSH_U32); });
+    time("build u32 flatbush", || {
+        Lazy::force(&FLATBUSH_U32);
+    });
 }
 
 #[test]
 #[ignore]
 fn build_flatbush_f64() {
-    time("build f64 flatbush", || { Lazy::force(&FLATBUSH_F64); });
+    time("build f64 flatbush", || {
+        Lazy::force(&FLATBUSH_F64);
+    });
 }
 
 fn get_kdbush<T: AllowedNumber + Any>() -> &'static KDBush<T> {
@@ -90,7 +107,8 @@ fn many_small_bbox_queries<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<
     time(&format!("10000 small bbox queries {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.search_range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
+            let _result: Vec<_> =
+                index.search_range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
         }
     });
 }
@@ -113,7 +131,8 @@ fn many_small_bbox_queries_flatbush<T: FBAllowedNumber + Any + FromPrimitive>() 
     time(&format!("10000 small bbox queries (flatbush) {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.search_range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
+            let _result: Vec<_> =
+                index.search_range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
         }
     });
 }

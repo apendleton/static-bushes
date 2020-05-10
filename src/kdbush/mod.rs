@@ -5,19 +5,22 @@ use core::iter::FromIterator;
 
 use crate::util::IndexVec;
 
-mod sort;
-mod range;
-mod within;
+#[cfg(test)]
+mod bench;
 mod exact;
-#[cfg(test)] mod test;
-#[cfg(test)] mod bench;
+mod range;
+mod sort;
+#[cfg(test)]
+mod test;
+mod within;
 
-pub trait AllowedNumber:
-    PartialOrd + NumOps + Copy
-    where Self: std::marker::Sized {}
+pub trait AllowedNumber: PartialOrd + NumOps + Copy
+where
+    Self: std::marker::Sized,
+{
+}
 
-impl<T> AllowedNumber for T
-    where T: PartialOrd + NumOps + Copy {}
+impl<T> AllowedNumber for T where T: PartialOrd + NumOps + Copy {}
 
 pub struct KDBush<T: AllowedNumber> {
     node_size: usize,
@@ -29,8 +32,6 @@ pub struct KDBushBuilder<T: AllowedNumber> {
     node_size: usize,
     coords: Vec<T>,
 }
-
-
 
 pub const DEFAULT_NODE_SIZE: usize = 64;
 

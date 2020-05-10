@@ -1,4 +1,4 @@
-use crate::kdbush::{ KDBush, AllowedNumber };
+use crate::kdbush::{AllowedNumber, KDBush};
 
 use genawaiter::rc::Gen;
 
@@ -19,7 +19,9 @@ impl<T: AllowedNumber> KDBush<T> {
                 // if we reached "tree node", search linearly
                 if right - left <= self.node_size {
                     for i in left..=right {
-                        if sq_dist(self.coords[2 * i], self.coords[2 * i + 1], qx, qy) <= r2 { co.yield_(self.ids.get(i) as usize).await; }
+                        if sq_dist(self.coords[2 * i], self.coords[2 * i + 1], qx, qy) <= r2 {
+                            co.yield_(self.ids.get(i) as usize).await;
+                        }
                     }
                     continue;
                 }
@@ -30,14 +32,13 @@ impl<T: AllowedNumber> KDBush<T> {
                 // include the middle item if it's in range
                 let x = self.coords[2 * m];
                 let y = self.coords[2 * m + 1];
-                if sq_dist(x, y, qx, qy) <= r2 { co.yield_(self.ids.get(m) as usize).await; }
+                if sq_dist(x, y, qx, qy) <= r2 {
+                    co.yield_(self.ids.get(m) as usize).await;
+                }
 
                 // queue search in halves that intersect the query
-                let (over_min, under_max) = if axis == 0 {
-                    (qx - r <= x, qx + r >= x)
-                } else {
-                    (qy - r <= y, qy + r >= y)
-                };
+                let (over_min, under_max) =
+                    if axis == 0 { (qx - r <= x, qx + r >= x) } else { (qy - r <= y, qy + r >= y) };
 
                 if over_min {
                     stack.push(left);
@@ -50,7 +51,8 @@ impl<T: AllowedNumber> KDBush<T> {
                     stack.push(1 - axis);
                 }
             }
-        }).into_iter()
+        })
+        .into_iter()
     }
 }
 

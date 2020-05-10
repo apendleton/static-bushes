@@ -2,8 +2,8 @@ use crate::flatbush::*;
 
 use std::time::Instant;
 
+use num_traits::{AsPrimitive, FromPrimitive};
 use rand::Rng;
-use num_traits::{FromPrimitive, AsPrimitive};
 
 pub const N: usize = 1000000;
 pub const K: usize = 1000;
@@ -21,19 +21,22 @@ fn add_random_box<T: FromPrimitive + AsPrimitive<f64>>(arr: &mut Vec<T>, box_siz
     arr.extend(vec![x, y, x2, y2]);
 }
 
-fn bench_search_range<T: AllowedNumber>(index: &FlatBush<T>, boxes: &[T], name: &str, warmup: bool) {
+fn bench_search_range<T: AllowedNumber>(
+    index: &FlatBush<T>,
+    boxes: &[T],
+    name: &str,
+    warmup: bool,
+) {
     let now = Instant::now();
     let id = format!("{} searches {}", K, name);
     for i in (0..boxes.len()).step_by(4) {
-        let _results: Vec<_> = index.search_range(
-            boxes[i],
-            boxes[i + 1],
-            boxes[i + 2],
-            boxes[i + 3]
-        ).collect();
+        let _results: Vec<_> =
+            index.search_range(boxes[i], boxes[i + 1], boxes[i + 2], boxes[i + 3]).collect();
     }
     let elapsed = now.elapsed().as_secs_f64();
-    if !warmup { println!("{} {} {}", std::any::type_name::<T>(), id, elapsed); }
+    if !warmup {
+        println!("{} {} {}", std::any::type_name::<T>(), id, elapsed);
+    }
 }
 
 fn bench_set<T: AllowedNumber + FromPrimitive>() {
@@ -54,12 +57,7 @@ fn bench_set<T: AllowedNumber + FromPrimitive>() {
     let now = Instant::now();
     let mut builder = FlatBushBuilder::new_with_node_size(NODE_SIZE);
     for i in (0..coords.len()).step_by(4) {
-        builder.add([
-            coords[i],
-            coords[i + 1],
-            coords[i + 2],
-            coords[i + 3]
-        ]);
+        builder.add([coords[i], coords[i + 1], coords[i + 2], coords[i + 3]]);
     }
     let index = builder.finish();
     let elapsed = now.elapsed().as_secs_f64();
