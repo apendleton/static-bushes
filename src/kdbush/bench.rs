@@ -4,8 +4,8 @@ use std::time::Instant;
 use std::any::{Any, type_name};
 
 use rand::Rng;
-use num_traits::{FromPrimitive, AsPrimitive, Zero, Bounded};
-use crate::flatbush::{FlatBushBuilder, FlatBush, AllowedNumber as FBAllowedNumber};
+use num_traits::{FromPrimitive, AsPrimitive};
+use crate::flatbush::{FlatBush, AllowedNumber as FBAllowedNumber};
 
 fn random_val<T: FromPrimitive + AsPrimitive<f64>>(max: f64) -> T {
     let mut rng = rand::thread_rng();
