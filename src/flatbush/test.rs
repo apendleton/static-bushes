@@ -1,5 +1,7 @@
 use once_cell::sync::Lazy;
 
+use std::convert::TryInto;
+
 use crate::flatbush::*;
 
 static DATA: Lazy<Vec<u32>> = Lazy::new(|| vec![
@@ -23,10 +25,10 @@ static DATA: Lazy<Vec<u32>> = Lazy::new(|| vec![
 ]);
 
 fn create_index() -> Flatbush<u32> {
-    let mut builder = FlatbushBuilder::new(DATA.len() / 4, None);
+    let mut builder = FlatbushBuilder::new();
 
     for i in (0..DATA.len()).step_by(4) {
-        builder.add(DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]);
+        builder.add([DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]]);
     }
     let index = builder.finish();
 
@@ -34,9 +36,9 @@ fn create_index() -> Flatbush<u32> {
 }
 
 fn create_small_index(num_items: usize, node_size: usize) -> Flatbush<u32> {
-    let mut builder = FlatbushBuilder::new(num_items, Some(node_size));
+    let mut builder = FlatbushBuilder::new_with_node_size(node_size);
     for i in (0..(4 * num_items)).step_by(4) {
-        builder.add(DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]);
+        builder.add([DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]]);
     }
     let index = builder.finish();
     return index;
@@ -52,7 +54,6 @@ fn indexes_a_bunch_of_rectangles() {
     assert_eq!(index.boxes.len() + index.indices.iter().count(), 540);
     assert_eq!(index.boxes[(len - 4)..len], [0, 1, 96, 95]);
     assert_eq!(index.indices.get(len / 4 - 1), 400);
-
 }
 
 #[test]
@@ -108,14 +109,12 @@ fn performs_bbox_search() {
 #[test]
 fn performs_bbox_search_signed_float() {
 	// performs bbox search
-    let mut builder = FlatbushBuilder::new(DATA.len() / 4, None);
-
     let data: Vec<f64> = DATA.iter().map(|d| (*d as f64) - 100.0).collect();
 
-    for i in (0..data.len()).step_by(4) {
-        builder.add(data[i], data[i + 1], data[i + 2], data[i + 3]);
-    }
-    let index = builder.finish();
+    let index: Flatbush<_> = data.chunks(4).map(|a| {
+        let a: &[f64; 4] = a.try_into().unwrap();
+        a
+    }).collect();
 
     let ids = index.search_range(-60.0, -60.0, -40.0, -40.0);
 
@@ -136,22 +135,14 @@ fn performs_bbox_search_signed_float() {
 }
 
 #[test]
-#[should_panic]
-fn throws_an_error_if_added_less_items_than_the_index_size() {
-	// throws an error if added less items than the index size
-    let builder: FlatbushBuilder<u32> = FlatbushBuilder::new(DATA.len() / 4, None);
-    let _index = builder.finish();
-}
-
-#[test]
 fn returns_index_of_newly_added_rectangle() {
 	// returns index of newly-added rectangle
     let count = 5;
-    let mut builder = FlatbushBuilder::new(count, None);
+    let mut builder = FlatbushBuilder::new();
 
     let mut ids = vec![];
     for i in 0..count {
-        let id = builder.add(DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]);
+        let id = builder.add([DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]]);
         ids.push(id);
     }
 

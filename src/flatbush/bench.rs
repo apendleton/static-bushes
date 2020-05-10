@@ -52,14 +52,14 @@ fn bench_set<T: AllowedNumber + FromPrimitive>() {
     }
 
     let now = Instant::now();
-    let mut builder = FlatbushBuilder::new(N, Some(NODE_SIZE));
+    let mut builder = FlatbushBuilder::new_with_node_size(NODE_SIZE);
     for i in (0..coords.len()).step_by(4) {
-        builder.add(
+        builder.add([
             coords[i],
             coords[i + 1],
             coords[i + 2],
             coords[i + 3]
-        );
+        ]);
     }
     let index = builder.finish();
     let elapsed = now.elapsed().as_secs_f64();

@@ -44,10 +44,12 @@ impl<T: AllowedNumber> KDBushBuilder<T> {
         KDBushBuilder { coords: Vec::new(), node_size }
     }
 
-    pub fn add<U: Borrow<[T; 2]>>(&mut self, point: U) {
+    pub fn add<U: Borrow<[T; 2]>>(&mut self, point: U) -> usize {
         let point = point.borrow();
         self.coords.push(point[0]);
         self.coords.push(point[1]);
+
+        (self.coords.len() >> 1) - 1
     }
 
     pub fn finish(mut self) -> KDBush<T> {

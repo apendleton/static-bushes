@@ -24,16 +24,8 @@ static POINTS_F64: Lazy<Vec<[f64; 2]>> = Lazy::new(|| (0..1000000).map(|_| rando
 static KDBUSH_U32: Lazy<KDBush<u32>> = Lazy::new(|| POINTS_U32.iter().collect());
 static KDBUSH_F64: Lazy<KDBush<f64>> = Lazy::new(|| POINTS_F64.iter().collect());
 
-static FLATBUSH_U32: Lazy<Flatbush<u32>> = Lazy::new(|| {
-    let mut builder = FlatbushBuilder::new(POINTS_U32.len(), None);
-    for coords in POINTS_U32.iter() { builder.add(coords[0], coords[1], coords[0], coords[1]); }
-    builder.finish()
-});
-static FLATBUSH_F64: Lazy<Flatbush<f64>> = Lazy::new(|| {
-    let mut builder = FlatbushBuilder::new(POINTS_U32.len(), None);
-    for coords in POINTS_F64.iter() { builder.add(coords[0], coords[1], coords[0], coords[1]); }
-    builder.finish()
-});
+static FLATBUSH_U32: Lazy<Flatbush<u32>> = Lazy::new(|| POINTS_U32.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
+static FLATBUSH_F64: Lazy<Flatbush<f64>> = Lazy::new(|| POINTS_F64.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
 
 fn time<F>(name: &str, f: F) where F: Fn() -> () {
     let now = Instant::now();

@@ -1,5 +1,8 @@
 use num_traits::{ NumOps, AsPrimitive, Bounded, Zero };
 
+use core::borrow::Borrow;
+use core::iter::FromIterator;
+
 use crate::util::IndexVec;
 
 #[cfg(test)] mod test;
@@ -18,7 +21,6 @@ pub struct Flatbush<T: AllowedNumber> {
     level_bounds: Vec<usize>,
     num_items: usize,
     node_size: usize,
-    pos: usize,
     min_x: T,
     min_y: T,
     max_x: T,
@@ -26,7 +28,12 @@ pub struct Flatbush<T: AllowedNumber> {
 }
 
 pub struct FlatbushBuilder<T: AllowedNumber> {
-    bush: Flatbush<T>
+    boxes: Vec<T>,
+    node_size: usize,
+    min_x: T,
+    min_y: T,
+    max_x: T,
+    max_y: T,
 }
 
 pub const DEFAULT_NODE_SIZE: usize = 16;
@@ -34,111 +41,97 @@ pub const MIN_NODE_SIZE: usize = 2;
 pub const MAX_NODE_SIZE: usize = 65535;
 
 impl<T: AllowedNumber> FlatbushBuilder<T> {
-    pub fn new(num_items: usize, node_size: Option<usize>) -> FlatbushBuilder<T> {
+    #[inline(always)]
+    pub fn new() -> FlatbushBuilder<T> {
+        FlatbushBuilder::new_with_node_size(DEFAULT_NODE_SIZE)
+    }
+
+    pub fn new_with_node_size(node_size: usize) -> FlatbushBuilder<T> {
         let node_size: usize = match node_size {
-            None => DEFAULT_NODE_SIZE,
-            Some(x) if x < MIN_NODE_SIZE => MIN_NODE_SIZE,
-            Some(x) if x > MAX_NODE_SIZE => MAX_NODE_SIZE,
-            Some(x) => x,
+            x if x < MIN_NODE_SIZE => MIN_NODE_SIZE,
+            x if x > MAX_NODE_SIZE => MAX_NODE_SIZE,
+            x => x,
         };
 
-        // calculate the total number of nodes in the R-tree to allocate space for
-        // and the index of each tree level (used in search later)
-        let mut n = num_items;
-        let mut num_nodes = n;
-        let mut level_bounds = vec![n * 4];
-        loop {
-            n = ceiling_division(n, node_size);
-            num_nodes += n;
-            level_bounds.push(num_nodes * 4);
-            if n == 1 { break; }
-        }
-
-
-        let boxes_len = num_nodes * 4;
-        let mut boxes = Vec::with_capacity(boxes_len);
-        boxes.resize(boxes_len, T::zero());
-
-        let indices = if num_nodes < 16384 {
-            IndexVec::U16(vec![0u16; num_nodes])
-        } else {
-            IndexVec::U32(vec![0u32; num_nodes])
-        };
-
-        let pos = 0;
         let min_x = T::max_value();
         let min_y = T::max_value();
         let max_x = T::min_value();
         let max_y = T::min_value();
 
-        let bush: Flatbush<T> = Flatbush { boxes, indices, level_bounds, num_items, node_size, pos, min_x, min_y, max_x, max_y };
-        FlatbushBuilder { bush }
-
-        // a priority queue for k-nearest-neighbors queries
-        // self.queue = new FlatQueue();
+        FlatbushBuilder { boxes: Vec::new(), node_size, min_x, min_y, max_x, max_y }
     }
 
-    pub fn add(&mut self, min_x: T, min_y: T, max_x: T, max_y: T) -> usize {
-        let bush = &mut self.bush;
+    pub fn add<U: Borrow<[T; 4]>>(&mut self, new_box: U) -> usize {
+        let new_box = new_box.borrow();
 
-        let index = bush.pos >> 2;
-        bush.indices.set(index, index as u32);
-        bush.boxes[bush.pos] = min_x;
-        bush.boxes[bush.pos + 1] = min_y;
-        bush.boxes[bush.pos + 2] = max_x;
-        bush.boxes[bush.pos + 3] = max_y;
-        bush.pos += 4;
+        self.boxes.extend_from_slice(new_box);
 
-        if min_x < bush.min_x { bush.min_x = min_x; }
-        if min_y < bush.min_y { bush.min_y = min_y; }
-        if max_x > bush.max_x { bush.max_x = max_x; }
-        if max_y > bush.max_y { bush.max_y = max_y; }
+        if new_box[0] < self.min_x { self.min_x = new_box[0]; }
+        if new_box[1] < self.min_y { self.min_y = new_box[1]; }
+        if new_box[2] > self.max_x { self.max_x = new_box[2]; }
+        if new_box[3] > self.max_y { self.max_y = new_box[3]; }
 
-        index
+        (self.boxes.len() >> 2) - 1
     }
 
-    pub fn finish(self) -> Flatbush<T> {
-        let mut bush = self.bush;
+    pub fn finish(mut self) -> Flatbush<T> {
+        let num_items = self.boxes.len() >> 2;
 
-        if bush.pos >> 2 != bush.num_items {
-            panic!("Added {} items when expected {}.", bush.pos >> 2, bush.num_items);
+        // calculate the total number of nodes in the R-tree to allocate space for
+        // and the index of each tree level
+        let mut n = num_items;
+        let mut num_nodes = n;
+        let mut level_bounds = vec![n * 4];
+        loop {
+            n = ceiling_division(n, self.node_size);
+            num_nodes += n;
+            level_bounds.push(num_nodes * 4);
+            if n == 1 { break; }
         }
 
-        if bush.num_items <= bush.node_size {
+        let mut indices = if num_nodes < 16384 {
+            let mut v = vec![0; num_nodes];
+            for i in 0..num_items { v[i] = i as u16; }
+            IndexVec::U16(v)
+        } else {
+            let mut v = vec![0; num_nodes];
+            for i in 0..num_items { v[i] = i as u32; }
+            IndexVec::U32(v)
+        };
+
+        if num_items <= self.node_size {
             // only one node, skip sorting and just fill the root box
-            bush.boxes[bush.pos] = bush.min_x;
-            bush.boxes[bush.pos + 1] = bush.min_y;
-            bush.boxes[bush.pos + 2] = bush.max_x;
-            bush.boxes[bush.pos + 3] = bush.max_y;
-            bush.pos += 4;
-            return bush;
+            self.boxes.push(self.min_x);
+            self.boxes.push(self.min_y);
+            self.boxes.push(self.max_x);
+            self.boxes.push(self.max_y);
+            return Flatbush { boxes: self.boxes, indices, level_bounds, num_items, node_size: self.node_size, min_x: self.min_x, min_y: self.min_y, max_x: self.max_x, max_y: self.max_y };
         }
 
-        let (bush_min_x, bush_min_y, bush_max_x, bush_max_y) = (bush.min_x.as_(), bush.min_y.as_(), bush.max_x.as_(), bush.max_y.as_());
+        let (bush_min_x, bush_min_y, bush_max_x, bush_max_y) = (self.min_x.as_(), self.min_y.as_(), self.max_x.as_(), self.max_y.as_());
         let width: f64 = bush_max_x - bush_min_x;
         let height: f64 = bush_max_y - bush_min_y;
-        let mut hilbert_values = vec![0u32; bush.num_items];
-        let hilbert_max = ((1 << 16) - 1) as f64;
 
+        let hilbert_max = ((1 << 16) - 1) as f64;
         // map item centers into Hilbert coordinate space and calculate Hilbert values
-        for i in 0..bush.num_items {
+        let mut hilbert_values: Vec<_> = (0..num_items).map(|i| {
             let pos = 4 * i;
-            let min_x: f64 = bush.boxes[pos].as_();
-            let min_y: f64 = bush.boxes[pos + 1].as_();
-            let max_x: f64 = bush.boxes[pos + 2].as_();
-            let max_y: f64 = bush.boxes[pos + 3].as_();
+            let min_x: f64 = self.boxes[pos].as_();
+            let min_y: f64 = self.boxes[pos + 1].as_();
+            let max_x: f64 = self.boxes[pos + 2].as_();
+            let max_y: f64 = self.boxes[pos + 3].as_();
             let x = (hilbert_max * ((min_x + max_x) / 2.0 - bush_min_x) / width).floor() as u32;
             let y = (hilbert_max * ((min_y + max_y) / 2.0 - bush_min_y) / height).floor() as u32;
-            hilbert_values[i] = hilbert(x, y);
-        }
+            hilbert(x, y)
+        }).collect();
 
         // sort items by their Hilbert value (for packing later)
-        sort(&mut hilbert_values, bush.boxes.as_mut_slice(), &mut bush.indices, 0, bush.num_items - 1, bush.node_size);
+        sort(&mut hilbert_values, self.boxes.as_mut_slice(), &mut indices, 0, num_items - 1, self.node_size);
 
         // generate nodes at each tree level, bottom-up
         let mut pos = 0;
-        for i in 0..(bush.level_bounds.len() - 1) {
-            let end = bush.level_bounds[i];
+        for i in 0..(level_bounds.len() - 1) {
+            let end = level_bounds[i];
 
             // generate a parent node for each block of consecutive <node_size> nodes
             while pos < end {
@@ -149,26 +142,25 @@ impl<T: AllowedNumber> FlatbushBuilder<T> {
                 let mut node_min_y: T = T::max_value();
                 let mut node_max_x: T = T::min_value();
                 let mut node_max_y: T = T::min_value();
-                for _i in 0..bush.node_size {
+                for _i in 0..self.node_size {
                     if pos >= end { break; }
-                    node_min_x = min(node_min_x, bush.boxes[pos]);
-                    node_min_y = min(node_min_y, bush.boxes[pos + 1]);
-                    node_max_x = max(node_max_x, bush.boxes[pos + 2]);
-                    node_max_y = max(node_max_y, bush.boxes[pos + 3]);
+                    node_min_x = min(node_min_x, self.boxes[pos]);
+                    node_min_y = min(node_min_y, self.boxes[pos + 1]);
+                    node_max_x = max(node_max_x, self.boxes[pos + 2]);
+                    node_max_y = max(node_max_y, self.boxes[pos + 3]);
                     pos += 4;
                 }
 
                 // add the new node to the tree data
-                bush.indices.set(bush.pos >> 2, node_index as u32);
-                bush.boxes[bush.pos] = node_min_x;
-                bush.boxes[bush.pos + 1] = node_min_y;
-                bush.boxes[bush.pos + 2] = node_max_x;
-                bush.boxes[bush.pos + 3] = node_max_y;
-                bush.pos += 4;
+                indices.set(self.boxes.len() >> 2, node_index as u32);
+                self.boxes.push(node_min_x);
+                self.boxes.push(node_min_y);
+                self.boxes.push(node_max_x);
+                self.boxes.push(node_max_y);
             }
         }
 
-        bush
+        Flatbush { boxes: self.boxes, indices, level_bounds, num_items, node_size: self.node_size, min_x: self.min_x, min_y: self.min_y, max_x: self.max_x, max_y: self.max_y }
     }
 }
 
@@ -218,6 +210,22 @@ impl<T: AllowedNumber> Flatbush<T> {
 
     pub fn bounds(&self) -> [T; 4] {
         [self.min_x, self.min_y, self.max_x, self.max_y]
+    }
+}
+
+impl<T: AllowedNumber, U: Borrow<[T; 4]>> Extend<U> for FlatbushBuilder<T> {
+    fn extend<I: IntoIterator<Item = U>>(&mut self, boxes: I) {
+        for box_ in boxes {
+            self.add(box_);
+        }
+    }
+}
+
+impl<T: AllowedNumber, U: Borrow<[T; 4]>> FromIterator<U> for Flatbush<T> {
+    fn from_iter<I: IntoIterator<Item = U>>(boxes: I) -> Self {
+        let mut builder = FlatbushBuilder::new();
+        builder.extend(boxes);
+        builder.finish()
     }
 }
 
