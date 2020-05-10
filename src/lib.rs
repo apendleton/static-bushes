@@ -1,6 +1,7 @@
 use num_traits::{ NumOps, Bounded };
 
 use core::borrow::Borrow;
+use core::iter::FromIterator;
 
 mod sort;
 mod range;
@@ -61,34 +62,39 @@ impl IndexVec {
     }
 }
 
-// import sort from './sort';
-// import range from './range';
-// import within from './within';
-
 pub struct KDBush<T: AllowedNumber> {
     node_size: usize,
     coords: Vec<T>,
     ids: IndexVec,
 }
 
+pub struct KDBushBuilder<T: AllowedNumber> {
+    node_size: usize,
+    coords: Vec<T>,
+}
+
 
 
 pub const DEFAULT_NODE_SIZE: usize = 64;
 
-impl<T: AllowedNumber> KDBush<T> {
-    pub fn new<U: Borrow<[T; 2]>, V: IntoIterator<Item = U>>(points: V, node_size: Option<usize>) -> KDBush<T> {
-        let node_size: usize = node_size.unwrap_or(DEFAULT_NODE_SIZE);
+impl<T: AllowedNumber> KDBushBuilder<T> {
+    #[inline(always)]
+    pub fn new() -> KDBushBuilder<T> {
+        KDBushBuilder::new_with_node_size(DEFAULT_NODE_SIZE)
+    }
 
-        // store indices to the input array and coordinates in separate typed arrays
-        let mut coords: Vec<T> = Vec::new();
+    pub fn new_with_node_size(node_size: usize) -> KDBushBuilder<T> {
+        KDBushBuilder { coords: Vec::new(), node_size }
+    }
 
-        for point in points {
-            let point = point.borrow();
-            coords.push(point[0]);
-            coords.push(point[1]);
-        }
+    pub fn add<U: Borrow<[T; 2]>>(&mut self, point: U) {
+        let point = point.borrow();
+        self.coords.push(point[0]);
+        self.coords.push(point[1]);
+    }
 
-        let num_points = coords.len() >> 1;
+    pub fn finish(mut self) -> KDBush<T> {
+        let num_points = self.coords.len() >> 1;
         let mut ids = if num_points < 65536 {
             IndexVec::U16((0..(num_points as u16)).collect())
         } else {
@@ -96,8 +102,24 @@ impl<T: AllowedNumber> KDBush<T> {
         };
 
         // kd-sort both arrays for efficient search (see comments in sort.js)
-        sort::sort_kd(&mut ids, &mut coords, node_size, 0, num_points - 1, 0);
+        sort::sort_kd(&mut ids, &mut self.coords, self.node_size, 0, num_points - 1, 0);
 
-        KDBush { node_size, coords, ids }
+        KDBush { node_size: self.node_size, coords: self.coords, ids }
+    }
+}
+
+impl<T: AllowedNumber, U: Borrow<[T; 2]>> Extend<U> for KDBushBuilder<T> {
+    fn extend<I: IntoIterator<Item = U>>(&mut self, points: I) {
+        for point in points {
+            self.add(point);
+        }
+    }
+}
+
+impl<T: AllowedNumber, U: Borrow<[T; 2]>> FromIterator<U> for KDBush<T> {
+    fn from_iter<I: IntoIterator<Item = U>>(points: I) -> Self {
+        let mut builder = KDBushBuilder::new();
+        builder.extend(points);
+        builder.finish()
     }
 }

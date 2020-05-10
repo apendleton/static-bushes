@@ -21,8 +21,8 @@ use once_cell::sync::Lazy;
 static POINTS_U32: Lazy<Vec<[u32; 2]>> = Lazy::new(|| (0..1000000).map(|_| random_point(1000.0)).collect());
 static POINTS_F64: Lazy<Vec<[f64; 2]>> = Lazy::new(|| (0..1000000).map(|_| random_point(1000.0)).collect());
 
-static KDBUSH_U32: Lazy<KDBush<u32>> = Lazy::new(|| KDBush::new(POINTS_U32.iter(), None));
-static KDBUSH_F64: Lazy<KDBush<f64>> = Lazy::new(|| KDBush::new(POINTS_F64.iter(), None));
+static KDBUSH_U32: Lazy<KDBush<u32>> = Lazy::new(|| POINTS_U32.iter().collect());
+static KDBUSH_F64: Lazy<KDBush<f64>> = Lazy::new(|| POINTS_F64.iter().collect());
 
 static FLATBUSH_U32: Lazy<Flatbush<u32>> = Lazy::new(|| {
     let mut builder = FlatbushBuilder::new(POINTS_U32.len(), None);
