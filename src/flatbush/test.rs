@@ -1,6 +1,6 @@
 use once_cell::sync::Lazy;
 
-use crate::*;
+use crate::flatbush::*;
 
 static DATA: Lazy<Vec<u32>> = Lazy::new(|| vec![
     8, 62, 11, 66, 57, 17, 57, 19, 76, 26, 79, 29, 36, 56, 38, 56, 92, 77, 96, 80, 87, 70, 90, 74,

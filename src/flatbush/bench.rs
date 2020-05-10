@@ -1,4 +1,4 @@
-use crate::*;
+use crate::flatbush::*;
 
 use std::time::Instant;
 

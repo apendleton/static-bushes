@@ -1,5 +1,5 @@
 [package]
-name = "flatbush-rs"
+name = "static-bushes"
 version = "0.1.0"
 authors = ["Vladimir Agafonkin <agafonkin@gmail.com>", "Andrew Pendleton <andrew@mapbox.com>"]
 edition = "2018"
