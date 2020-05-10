@@ -1,4 +1,4 @@
-use num_traits::{ NumOps, Bounded };
+use num_traits::NumOps;
 
 use core::borrow::Borrow;
 use core::iter::FromIterator;
@@ -13,11 +13,11 @@ mod exact;
 #[cfg(test)] mod bench;
 
 pub trait AllowedNumber:
-    PartialOrd + NumOps + Bounded + Copy
+    PartialOrd + NumOps + Copy
     where Self: std::marker::Sized {}
 
 impl<T> AllowedNumber for T
-    where T: PartialOrd + NumOps + Bounded + Copy {}
+    where T: PartialOrd + NumOps + Copy {}
 
 pub struct KDBush<T: AllowedNumber> {
     node_size: usize,

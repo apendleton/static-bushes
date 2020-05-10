@@ -21,7 +21,7 @@ fn add_random_box<T: FromPrimitive + AsPrimitive<f64>>(arr: &mut Vec<T>, box_siz
     arr.extend(vec![x, y, x2, y2]);
 }
 
-fn bench_search_range<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero>(index: &Flatbush<T>, boxes: &[T], name: &str, warmup: bool) {
+fn bench_search_range<T: AllowedNumber>(index: &Flatbush<T>, boxes: &[T], name: &str, warmup: bool) {
     let now = Instant::now();
     let id = format!("{} searches {}", K, name);
     for i in (0..boxes.len()).step_by(4) {
@@ -36,7 +36,7 @@ fn bench_search_range<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero
     if !warmup { println!("{} {} {}", std::any::type_name::<T>(), id, elapsed); }
 }
 
-fn bench_set<T: PartialOrd + NumOps + AsPrimitive<f64> + FromPrimitive + Bounded + Zero>() {
+fn bench_set<T: AllowedNumber + FromPrimitive>() {
     let mut coords: Vec<T> = Vec::new();
     for _i in 0..N {
         add_random_box(&mut coords, 1);

@@ -1,4 +1,4 @@
-use crate::{ AllowedNumber, util::IndexVec };
+use crate::{ kdbush::AllowedNumber, util::IndexVec };
 
 pub fn sort_kd<T: AllowedNumber>(ids: &mut IndexVec, coords: &mut [T], node_size: usize, left: usize, right: usize, axis: usize) {
     if right - left <= node_size { return; }

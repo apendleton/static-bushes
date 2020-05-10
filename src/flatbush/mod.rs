@@ -5,7 +5,14 @@ use crate::util::IndexVec;
 #[cfg(test)] mod test;
 #[cfg(test)] mod bench;
 
-pub struct Flatbush<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> {
+pub trait AllowedNumber:
+    PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero
+    where Self: std::marker::Sized {}
+
+impl<T> AllowedNumber for T
+    where T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero {}
+
+pub struct Flatbush<T: AllowedNumber> {
     boxes: Vec<T>,
     indices: IndexVec,
     level_bounds: Vec<usize>,
@@ -18,17 +25,15 @@ pub struct Flatbush<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> 
     max_y: T,
 }
 
-pub struct FlatbushBuilder<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> {
+pub struct FlatbushBuilder<T: AllowedNumber> {
     bush: Flatbush<T>
 }
-
-
 
 pub const DEFAULT_NODE_SIZE: usize = 16;
 pub const MIN_NODE_SIZE: usize = 2;
 pub const MAX_NODE_SIZE: usize = 65535;
 
-impl<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> FlatbushBuilder<T> {
+impl<T: AllowedNumber> FlatbushBuilder<T> {
     pub fn new(num_items: usize, node_size: Option<usize>) -> FlatbushBuilder<T> {
         let node_size: usize = match node_size {
             None => DEFAULT_NODE_SIZE,
@@ -167,7 +172,7 @@ impl<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> FlatbushBuilder
     }
 }
 
-impl<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> Flatbush<T> {
+impl<T: AllowedNumber> Flatbush<T> {
     pub fn search_range<'a>(&'a self, min_x: T, min_y: T, max_x: T, max_y: T) -> impl Iterator<Item = usize> + 'a {
         let mut queue: Vec<usize> = vec![self.boxes.len() - 4];
         let mut pos = usize::MAX;
@@ -232,7 +237,7 @@ fn upper_bound(value: usize, arr: &[usize]) -> usize {
 }
 
 // custom quicksort that partially sorts bbox data alongside the hilbert values
-fn sort<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero>(values: &mut [u32], boxes: &mut [T], indices: &mut IndexVec, left: usize, right: usize, node_size: usize) {
+fn sort<T: AllowedNumber>(values: &mut [u32], boxes: &mut [T], indices: &mut IndexVec, left: usize, right: usize, node_size: usize) {
     if (left / node_size) >= (right / node_size) { return; }
 
     let pivot = values[(left + right) >> 1];
@@ -257,7 +262,7 @@ fn sort<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero>(values: &mut
 }
 
 // swap two values and two corresponding boxes
-fn swap<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero>(values: &mut [u32], boxes: &mut [T], indices: &mut IndexVec, i: usize, j: usize) {
+fn swap<T: AllowedNumber>(values: &mut [u32], boxes: &mut [T], indices: &mut IndexVec, i: usize, j: usize) {
     let temp = values[i];
     values[i] = values[j];
     values[j] = temp;

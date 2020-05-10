@@ -4,8 +4,8 @@ use std::time::Instant;
 use std::any::{Any, type_name};
 
 use rand::Rng;
-use num_traits::{FromPrimitive, AsPrimitive, Zero};
-use crate::flatbush::{FlatbushBuilder, Flatbush};
+use num_traits::{FromPrimitive, AsPrimitive, Zero, Bounded};
+use crate::flatbush::{FlatbushBuilder, Flatbush, AllowedNumber as FBAllowedNumber};
 
 fn random_val<T: FromPrimitive + AsPrimitive<f64>>(max: f64) -> T {
     let mut rng = rand::thread_rng();
@@ -79,7 +79,7 @@ fn get_kdbush<T: AllowedNumber + Any>() -> &'static KDBush<T> {
     }
 }
 
-fn get_flatbush<T: AllowedNumber + Any + Zero + AsPrimitive<f64>>() -> &'static Flatbush<T> {
+fn get_flatbush<T: FBAllowedNumber + Any>() -> &'static Flatbush<T> {
     let flatbush_u32 = &*FLATBUSH_U32 as &dyn Any;
     let flatbush_f64 = &*FLATBUSH_F64 as &dyn Any;
 
@@ -115,7 +115,7 @@ fn many_small_bbox_queries_u32() {
     many_small_bbox_queries::<u32>();
 }
 
-fn many_small_bbox_queries_flatbush<T: AllowedNumber + Any + Zero + FromPrimitive + AsPrimitive<f64>>() {
+fn many_small_bbox_queries_flatbush<T: FBAllowedNumber + Any + FromPrimitive>() {
     let index: &Flatbush<T> = get_flatbush();
     let one = T::from_u32(1).unwrap();
     time(&format!("10000 small bbox queries (flatbush) {}", type_name::<T>()), || {
@@ -228,7 +228,7 @@ fn many_exact_queries_exact_u32() {
     many_exact_queries_exact::<u32>();
 }
 
-fn many_exact_queries_flatbush<T: AllowedNumber + Any + Zero + FromPrimitive + AsPrimitive<f64>>() {
+fn many_exact_queries_flatbush<T: FBAllowedNumber + Any + FromPrimitive>() {
     let index: &Flatbush<T> = get_flatbush();
     time(&format!("10000 exact queries (flatbush) {}", type_name::<T>()), || {
         for _i in 0..10000 {

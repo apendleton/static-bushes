@@ -1,4 +1,4 @@
-use crate::{ KDBush, AllowedNumber };
+use crate::kdbush::{ KDBush, AllowedNumber };
 
 use genawaiter::rc::Gen;
 
