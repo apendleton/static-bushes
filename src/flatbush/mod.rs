@@ -15,7 +15,7 @@ pub trait AllowedNumber:
 impl<T> AllowedNumber for T
     where T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero {}
 
-pub struct Flatbush<T: AllowedNumber> {
+pub struct FlatBush<T: AllowedNumber> {
     boxes: Vec<T>,
     indices: IndexVec,
     level_bounds: Vec<usize>,
@@ -27,7 +27,7 @@ pub struct Flatbush<T: AllowedNumber> {
     max_y: T,
 }
 
-pub struct FlatbushBuilder<T: AllowedNumber> {
+pub struct FlatBushBuilder<T: AllowedNumber> {
     boxes: Vec<T>,
     node_size: usize,
     min_x: T,
@@ -40,13 +40,13 @@ pub const DEFAULT_NODE_SIZE: usize = 16;
 pub const MIN_NODE_SIZE: usize = 2;
 pub const MAX_NODE_SIZE: usize = 65535;
 
-impl<T: AllowedNumber> FlatbushBuilder<T> {
+impl<T: AllowedNumber> FlatBushBuilder<T> {
     #[inline(always)]
-    pub fn new() -> FlatbushBuilder<T> {
-        FlatbushBuilder::new_with_node_size(DEFAULT_NODE_SIZE)
+    pub fn new() -> FlatBushBuilder<T> {
+        FlatBushBuilder::new_with_node_size(DEFAULT_NODE_SIZE)
     }
 
-    pub fn new_with_node_size(node_size: usize) -> FlatbushBuilder<T> {
+    pub fn new_with_node_size(node_size: usize) -> FlatBushBuilder<T> {
         let node_size: usize = match node_size {
             x if x < MIN_NODE_SIZE => MIN_NODE_SIZE,
             x if x > MAX_NODE_SIZE => MAX_NODE_SIZE,
@@ -58,7 +58,7 @@ impl<T: AllowedNumber> FlatbushBuilder<T> {
         let max_x = T::min_value();
         let max_y = T::min_value();
 
-        FlatbushBuilder { boxes: Vec::new(), node_size, min_x, min_y, max_x, max_y }
+        FlatBushBuilder { boxes: Vec::new(), node_size, min_x, min_y, max_x, max_y }
     }
 
     pub fn add<U: Borrow<[T; 4]>>(&mut self, new_box: U) -> usize {
@@ -74,7 +74,7 @@ impl<T: AllowedNumber> FlatbushBuilder<T> {
         (self.boxes.len() >> 2) - 1
     }
 
-    pub fn finish(mut self) -> Flatbush<T> {
+    pub fn finish(mut self) -> FlatBush<T> {
         let num_items = self.boxes.len() >> 2;
 
         // calculate the total number of nodes in the R-tree to allocate space for
@@ -105,7 +105,7 @@ impl<T: AllowedNumber> FlatbushBuilder<T> {
             self.boxes.push(self.min_y);
             self.boxes.push(self.max_x);
             self.boxes.push(self.max_y);
-            return Flatbush { boxes: self.boxes, indices, level_bounds, num_items, node_size: self.node_size, min_x: self.min_x, min_y: self.min_y, max_x: self.max_x, max_y: self.max_y };
+            return FlatBush { boxes: self.boxes, indices, level_bounds, num_items, node_size: self.node_size, min_x: self.min_x, min_y: self.min_y, max_x: self.max_x, max_y: self.max_y };
         }
 
         let (bush_min_x, bush_min_y, bush_max_x, bush_max_y) = (self.min_x.as_(), self.min_y.as_(), self.max_x.as_(), self.max_y.as_());
@@ -160,11 +160,11 @@ impl<T: AllowedNumber> FlatbushBuilder<T> {
             }
         }
 
-        Flatbush { boxes: self.boxes, indices, level_bounds, num_items, node_size: self.node_size, min_x: self.min_x, min_y: self.min_y, max_x: self.max_x, max_y: self.max_y }
+        FlatBush { boxes: self.boxes, indices, level_bounds, num_items, node_size: self.node_size, min_x: self.min_x, min_y: self.min_y, max_x: self.max_x, max_y: self.max_y }
     }
 }
 
-impl<T: AllowedNumber> Flatbush<T> {
+impl<T: AllowedNumber> FlatBush<T> {
     pub fn search_range<'a>(&'a self, min_x: T, min_y: T, max_x: T, max_y: T) -> impl Iterator<Item = usize> + 'a {
         let mut queue: Vec<usize> = vec![self.boxes.len() - 4];
         let mut pos = usize::MAX;
@@ -213,7 +213,7 @@ impl<T: AllowedNumber> Flatbush<T> {
     }
 }
 
-impl<T: AllowedNumber, U: Borrow<[T; 4]>> Extend<U> for FlatbushBuilder<T> {
+impl<T: AllowedNumber, U: Borrow<[T; 4]>> Extend<U> for FlatBushBuilder<T> {
     fn extend<I: IntoIterator<Item = U>>(&mut self, boxes: I) {
         for box_ in boxes {
             self.add(box_);
@@ -221,9 +221,9 @@ impl<T: AllowedNumber, U: Borrow<[T; 4]>> Extend<U> for FlatbushBuilder<T> {
     }
 }
 
-impl<T: AllowedNumber, U: Borrow<[T; 4]>> FromIterator<U> for Flatbush<T> {
+impl<T: AllowedNumber, U: Borrow<[T; 4]>> FromIterator<U> for FlatBush<T> {
     fn from_iter<I: IntoIterator<Item = U>>(boxes: I) -> Self {
-        let mut builder = FlatbushBuilder::new();
+        let mut builder = FlatBushBuilder::new();
         builder.extend(boxes);
         builder.finish()
     }

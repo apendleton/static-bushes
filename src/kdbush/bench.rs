@@ -5,7 +5,7 @@ use std::any::{Any, type_name};
 
 use rand::Rng;
 use num_traits::{FromPrimitive, AsPrimitive, Zero, Bounded};
-use crate::flatbush::{FlatbushBuilder, Flatbush, AllowedNumber as FBAllowedNumber};
+use crate::flatbush::{FlatBushBuilder, FlatBush, AllowedNumber as FBAllowedNumber};
 
 fn random_val<T: FromPrimitive + AsPrimitive<f64>>(max: f64) -> T {
     let mut rng = rand::thread_rng();
@@ -24,8 +24,8 @@ static POINTS_F64: Lazy<Vec<[f64; 2]>> = Lazy::new(|| (0..1000000).map(|_| rando
 static KDBUSH_U32: Lazy<KDBush<u32>> = Lazy::new(|| POINTS_U32.iter().collect());
 static KDBUSH_F64: Lazy<KDBush<f64>> = Lazy::new(|| POINTS_F64.iter().collect());
 
-static FLATBUSH_U32: Lazy<Flatbush<u32>> = Lazy::new(|| POINTS_U32.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
-static FLATBUSH_F64: Lazy<Flatbush<f64>> = Lazy::new(|| POINTS_F64.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
+static FLATBUSH_U32: Lazy<FlatBush<u32>> = Lazy::new(|| POINTS_U32.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
+static FLATBUSH_F64: Lazy<FlatBush<f64>> = Lazy::new(|| POINTS_F64.iter().map(|coords| [coords[0], coords[1], coords[0], coords[1]]).collect());
 
 fn time<F>(name: &str, f: F) where F: Fn() -> () {
     let now = Instant::now();
@@ -71,13 +71,13 @@ fn get_kdbush<T: AllowedNumber + Any>() -> &'static KDBush<T> {
     }
 }
 
-fn get_flatbush<T: FBAllowedNumber + Any>() -> &'static Flatbush<T> {
+fn get_flatbush<T: FBAllowedNumber + Any>() -> &'static FlatBush<T> {
     let flatbush_u32 = &*FLATBUSH_U32 as &dyn Any;
     let flatbush_f64 = &*FLATBUSH_F64 as &dyn Any;
 
-    if let Some(bush) = flatbush_u32.downcast_ref::<Flatbush<T>>() {
+    if let Some(bush) = flatbush_u32.downcast_ref::<FlatBush<T>>() {
         bush
-    } else if let Some(bush) = flatbush_f64.downcast_ref::<Flatbush<T>>() {
+    } else if let Some(bush) = flatbush_f64.downcast_ref::<FlatBush<T>>() {
         bush
     } else {
         panic!("must be u32 or f64")
@@ -108,7 +108,7 @@ fn many_small_bbox_queries_u32() {
 }
 
 fn many_small_bbox_queries_flatbush<T: FBAllowedNumber + Any + FromPrimitive>() {
-    let index: &Flatbush<T> = get_flatbush();
+    let index: &FlatBush<T> = get_flatbush();
     let one = T::from_u32(1).unwrap();
     time(&format!("10000 small bbox queries (flatbush) {}", type_name::<T>()), || {
         for _i in 0..10000 {
@@ -221,7 +221,7 @@ fn many_exact_queries_exact_u32() {
 }
 
 fn many_exact_queries_flatbush<T: FBAllowedNumber + Any + FromPrimitive>() {
-    let index: &Flatbush<T> = get_flatbush();
+    let index: &FlatBush<T> = get_flatbush();
     time(&format!("10000 exact queries (flatbush) {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);

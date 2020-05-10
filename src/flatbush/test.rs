@@ -24,8 +24,8 @@ static DATA: Lazy<Vec<u32>> = Lazy::new(|| vec![
     89, 56, 74, 60, 76, 63, 62, 66, 65, 67
 ]);
 
-fn create_index() -> Flatbush<u32> {
-    let mut builder = FlatbushBuilder::new();
+fn create_index() -> FlatBush<u32> {
+    let mut builder = FlatBushBuilder::new();
 
     for i in (0..DATA.len()).step_by(4) {
         builder.add([DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]]);
@@ -35,8 +35,8 @@ fn create_index() -> Flatbush<u32> {
     return index;
 }
 
-fn create_small_index(num_items: usize, node_size: usize) -> Flatbush<u32> {
-    let mut builder = FlatbushBuilder::new_with_node_size(node_size);
+fn create_small_index(num_items: usize, node_size: usize) -> FlatBush<u32> {
+    let mut builder = FlatBushBuilder::new_with_node_size(node_size);
     for i in (0..(4 * num_items)).step_by(4) {
         builder.add([DATA[i], DATA[i + 1], DATA[i + 2], DATA[i + 3]]);
     }
@@ -111,7 +111,7 @@ fn performs_bbox_search_signed_float() {
 	// performs bbox search
     let data: Vec<f64> = DATA.iter().map(|d| (*d as f64) - 100.0).collect();
 
-    let index: Flatbush<_> = data.chunks(4).map(|a| {
+    let index: FlatBush<_> = data.chunks(4).map(|a| {
         let a: &[f64; 4] = a.try_into().unwrap();
         a
     }).collect();
@@ -138,7 +138,7 @@ fn performs_bbox_search_signed_float() {
 fn returns_index_of_newly_added_rectangle() {
 	// returns index of newly-added rectangle
     let count = 5;
-    let mut builder = FlatbushBuilder::new();
+    let mut builder = FlatBushBuilder::new();
 
     let mut ids = vec![];
     for i in 0..count {
