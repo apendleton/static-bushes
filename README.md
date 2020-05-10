@@ -1,4 +1,4 @@
-# flatbush-rs
+# static-bushes
 
 This is library contains Rust ports of two excellent spatial indexing libraries by @mourner: [KDBush](https://github.com/mourner/kdbush) and [Flatbush](https://github.com/mourner/flatbush) (incomplete: lacks nearest-neighbor search).
 
