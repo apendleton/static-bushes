@@ -1,4 +1,4 @@
-use crate::*;
+use crate::kdbush::*;
 
 use std::time::Instant;
 use std::any::{Any, type_name};

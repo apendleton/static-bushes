@@ -13,4 +13,4 @@ genawaiter = "0.99.1"
 [dev-dependencies]
 once_cell = "1.3.1"
 rand = "0.7.3"
-flatbush-rs = { path = "../flatbush-rs/" }
+static-bushes = { path = "../flatbush-rs/" }
