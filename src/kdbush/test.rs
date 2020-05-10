@@ -46,7 +46,7 @@ fn range_search() {
     builder.extend(POINTS.iter());
     let index = builder.finish();
 
-    let result: Vec<_> = index.range(20, 30, 50, 70).collect();
+    let result: Vec<_> = index.search_range(20, 30, 50, 70).collect();
 
     assert_eq!(result, vec![60,20,45,3,17,71,44,19,18,15,69,90,62,96,47,8,77,72], "returns ids");
 
@@ -79,7 +79,7 @@ fn radius_search() {
     let r = 20;
     let r2 = 20 * 20;
 
-    let result: Vec<_> = index.within(qp[0], qp[1], r).collect();
+    let result: Vec<_> = index.search_within(qp[0], qp[1], r).collect();
 
     assert_eq!(result, [60,6,25,92,42,20,45,3,71,44,18,96], "returns ids");
 

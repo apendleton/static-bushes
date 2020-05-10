@@ -3,7 +3,7 @@ use crate::{ KDBush, AllowedNumber };
 use genawaiter::rc::Gen;
 
 impl<T: AllowedNumber> KDBush<T> {
-    pub fn within<'a>(&'a self, qx: T, qy: T, r: T) -> impl Iterator<Item = usize> + 'a {
+    pub fn search_within<'a>(&'a self, qx: T, qy: T, r: T) -> impl Iterator<Item = usize> + 'a {
         let mut stack = vec![0, self.ids.len() - 1, 0];
         let r2 = r * r;
 

@@ -21,11 +21,11 @@ fn add_random_box<T: FromPrimitive + AsPrimitive<f64>>(arr: &mut Vec<T>, box_siz
     arr.extend(vec![x, y, x2, y2]);
 }
 
-fn bench_search<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero>(index: &Flatbush<T>, boxes: &[T], name: &str, warmup: bool) {
+fn bench_search_range<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero>(index: &Flatbush<T>, boxes: &[T], name: &str, warmup: bool) {
     let now = Instant::now();
     let id = format!("{} searches {}", K, name);
     for i in (0..boxes.len()).step_by(4) {
-        let _results: Vec<_> = index.search(
+        let _results: Vec<_> = index.search_range(
             boxes[i],
             boxes[i + 1],
             boxes[i + 2],
@@ -65,10 +65,10 @@ fn bench_set<T: PartialOrd + NumOps + AsPrimitive<f64> + FromPrimitive + Bounded
     let elapsed = now.elapsed().as_secs_f64();
     println!("flatbush {}", elapsed);
 
-    bench_search(&index, &boxes1, "0.01%", true);
-    bench_search(&index, &boxes100, "10%", false);
-    bench_search(&index, &boxes10, "1%", false);
-    bench_search(&index, &boxes1, "0.01%", false);
+    bench_search_range(&index, &boxes1, "0.01%", true);
+    bench_search_range(&index, &boxes100, "10%", false);
+    bench_search_range(&index, &boxes10, "1%", false);
+    bench_search_range(&index, &boxes1, "0.01%", false);
 }
 
 #[test]

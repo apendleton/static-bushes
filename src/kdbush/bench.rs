@@ -98,7 +98,7 @@ fn many_small_bbox_queries<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<
     time(&format!("10000 small bbox queries {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
+            let _result: Vec<_> = index.search_range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
         }
     });
 }
@@ -121,7 +121,7 @@ fn many_small_bbox_queries_flatbush<T: AllowedNumber + Any + Zero + FromPrimitiv
     time(&format!("10000 small bbox queries (flatbush) {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.search(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
+            let _result: Vec<_> = index.search_range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
         }
     });
 }
@@ -144,7 +144,7 @@ fn many_small_radius_queries<T: AllowedNumber + Any + FromPrimitive + AsPrimitiv
     time(&format!("10000 small radius queries {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.within(p[0], p[1], one).collect();
+            let _result: Vec<_> = index.search_within(p[0], p[1], one).collect();
         }
     });
 }
@@ -166,7 +166,7 @@ fn many_exact_queries<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<f64>>
     time(&format!("10000 exact queries {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.range(p[0], p[1], p[0], p[1]).collect();
+            let _result: Vec<_> = index.search_range(p[0], p[1], p[0], p[1]).collect();
         }
     });
 }
@@ -189,7 +189,7 @@ fn many_exact_queries_radius<T: AllowedNumber + Any + FromPrimitive + AsPrimitiv
     time(&format!("10000 exact queries (radius) {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.within(p[0], p[1], zero).collect();
+            let _result: Vec<_> = index.search_within(p[0], p[1], zero).collect();
         }
     });
 }
@@ -233,7 +233,7 @@ fn many_exact_queries_flatbush<T: AllowedNumber + Any + Zero + FromPrimitive + A
     time(&format!("10000 exact queries (flatbush) {}", type_name::<T>()), || {
         for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
-            let _result: Vec<_> = index.search(p[0], p[1], p[0], p[1]).collect();
+            let _result: Vec<_> = index.search_range(p[0], p[1], p[0], p[1]).collect();
         }
     });
 }

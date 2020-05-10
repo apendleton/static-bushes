@@ -91,7 +91,7 @@ fn performs_bbox_search() {
 	// performs bbox search
     let index = create_index();
 
-    let ids = index.search(40, 40, 60, 60);
+    let ids = index.search_range(40, 40, 60, 60);
 
     let mut results = Vec::new();
     for id in ids {
@@ -117,7 +117,7 @@ fn performs_bbox_search_signed_float() {
     }
     let index = builder.finish();
 
-    let ids = index.search(-60.0, -60.0, -40.0, -40.0);
+    let ids = index.search_range(-60.0, -60.0, -40.0, -40.0);
 
     let mut results = Vec::new();
     for id in ids {

@@ -197,7 +197,7 @@ impl<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> FlatbushBuilder
 }
 
 impl<T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero> Flatbush<T> {
-    pub fn search<'a>(&'a self, min_x: T, min_y: T, max_x: T, max_y: T) -> impl Iterator<Item = usize> + 'a {
+    pub fn search_range<'a>(&'a self, min_x: T, min_y: T, max_x: T, max_y: T) -> impl Iterator<Item = usize> + 'a {
         let mut queue: Vec<usize> = vec![self.boxes.len() - 4];
         let mut pos = usize::MAX;
         let mut node_index = 0;

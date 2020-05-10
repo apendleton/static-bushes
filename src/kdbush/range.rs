@@ -3,7 +3,7 @@ use crate::{ KDBush, AllowedNumber };
 use genawaiter::rc::Gen;
 
 impl<T: AllowedNumber> KDBush<T> {
-    pub fn range<'a>(&'a self, min_x: T, min_y: T, max_x: T, max_y: T) -> impl Iterator<Item = usize> + 'a {
+    pub fn search_range<'a>(&'a self, min_x: T, min_y: T, max_x: T, max_y: T) -> impl Iterator<Item = usize> + 'a {
         let mut stack = vec![0, self.ids.len() - 1, 0];
 
         Gen::new(|co| async move {
