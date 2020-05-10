@@ -5,7 +5,7 @@ use std::any::{Any, type_name};
 
 use rand::Rng;
 use num_traits::{FromPrimitive, AsPrimitive, Zero};
-use flatbush_rs::{FlatbushBuilder, Flatbush};
+use crate::flatbush::{FlatbushBuilder, Flatbush};
 
 fn random_val<T: FromPrimitive + AsPrimitive<f64>>(max: f64) -> T {
     let mut rng = rand::thread_rng();

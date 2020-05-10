@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 num-traits = "0.2.11"
+genawaiter = "0.99.1"
 
 [dev-dependencies]
 once_cell = "1.3.1"
