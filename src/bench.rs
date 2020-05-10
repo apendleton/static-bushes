@@ -93,14 +93,14 @@ fn get_flatbush<T: AllowedNumber + Any + Zero + AsPrimitive<f64>>() -> &'static 
 }
 
 fn many_small_bbox_queries<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<f64>>() {
-	let index: &KDBush<T> = get_kdbush();
+    let index: &KDBush<T> = get_kdbush();
     let one = T::from_u32(1).unwrap();
-	time(&format!("10000 small bbox queries {}", type_name::<T>()), || {
-	    for _i in 0..10000 {
-    	    let p: [T; 2] = random_point(1000.0);
+    time(&format!("10000 small bbox queries {}", type_name::<T>()), || {
+        for _i in 0..10000 {
+            let p: [T; 2] = random_point(1000.0);
             let _result: Vec<_> = index.range(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
         }
-	});
+    });
 }
 
 #[test]
@@ -116,14 +116,14 @@ fn many_small_bbox_queries_u32() {
 }
 
 fn many_small_bbox_queries_flatbush<T: AllowedNumber + Any + Zero + FromPrimitive + AsPrimitive<f64>>() {
-	let index: &Flatbush<T> = get_flatbush();
+    let index: &Flatbush<T> = get_flatbush();
     let one = T::from_u32(1).unwrap();
-	time(&format!("10000 small bbox queries (flatbush) {}", type_name::<T>()), || {
-    	for _i in 0..10000 {
+    time(&format!("10000 small bbox queries (flatbush) {}", type_name::<T>()), || {
+        for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
             let _result: Vec<_> = index.search(p[0] - one, p[1] - one, p[0] + one, p[1] + one).collect();
         }
-	});
+    });
 }
 
 #[test]
@@ -139,14 +139,14 @@ fn many_small_bbox_queries_flatbush_u32() {
 }
 
 fn many_small_radius_queries<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<f64>>() {
-	let index: &KDBush<T> = get_kdbush();
+    let index: &KDBush<T> = get_kdbush();
     let one = T::from_u32(1).unwrap();
-	time(&format!("10000 small radius queries {}", type_name::<T>()), || {
-	    for _i in 0..10000 {
-    	    let p: [T; 2] = random_point(1000.0);
+    time(&format!("10000 small radius queries {}", type_name::<T>()), || {
+        for _i in 0..10000 {
+            let p: [T; 2] = random_point(1000.0);
             let _result: Vec<_> = index.within(p[0], p[1], one).collect();
         }
-	});
+    });
 }
 
 #[test]
@@ -162,13 +162,13 @@ fn many_small_radius_queries_u32() {
 }
 
 fn many_exact_queries<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<f64>>() {
-	let index: &KDBush<T> = get_kdbush();
-	time(&format!("10000 exact queries {}", type_name::<T>()), || {
-    	for _i in 0..10000 {
+    let index: &KDBush<T> = get_kdbush();
+    time(&format!("10000 exact queries {}", type_name::<T>()), || {
+        for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
             let _result: Vec<_> = index.range(p[0], p[1], p[0], p[1]).collect();
         }
-	});
+    });
 }
 
 #[test]
@@ -184,14 +184,14 @@ fn many_exact_queries_u32() {
 }
 
 fn many_exact_queries_radius<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<f64>>() {
-	let index: &KDBush<T> = get_kdbush();
+    let index: &KDBush<T> = get_kdbush();
     let zero = T::from_u32(0).unwrap();
-	time(&format!("10000 exact queries (radius) {}", type_name::<T>()), || {
-    	for _i in 0..10000 {
+    time(&format!("10000 exact queries (radius) {}", type_name::<T>()), || {
+        for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
             let _result: Vec<_> = index.within(p[0], p[1], zero).collect();
         }
-	});
+    });
 }
 
 #[test]
@@ -207,13 +207,13 @@ fn many_exact_queries_radius_u32() {
 }
 
 fn many_exact_queries_exact<T: AllowedNumber + Any + FromPrimitive + AsPrimitive<f64>>() {
-	let index: &KDBush<T> = get_kdbush();
-	time(&format!("10000 exact queries (exact) {}", type_name::<T>()), || {
-    	for _i in 0..10000 {
+    let index: &KDBush<T> = get_kdbush();
+    time(&format!("10000 exact queries (exact) {}", type_name::<T>()), || {
+        for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
             let _result: Vec<_> = index.exact(p[0], p[1]).collect();
         }
-	});
+    });
 }
 
 #[test]
@@ -229,13 +229,13 @@ fn many_exact_queries_exact_u32() {
 }
 
 fn many_exact_queries_flatbush<T: AllowedNumber + Any + Zero + FromPrimitive + AsPrimitive<f64>>() {
-	let index: &Flatbush<T> = get_flatbush();
-	time(&format!("10000 exact queries (flatbush) {}", type_name::<T>()), || {
-    	for _i in 0..10000 {
+    let index: &Flatbush<T> = get_flatbush();
+    time(&format!("10000 exact queries (flatbush) {}", type_name::<T>()), || {
+        for _i in 0..10000 {
             let p: [T; 2] = random_point(1000.0);
             let _result: Vec<_> = index.search(p[0], p[1], p[0], p[1]).collect();
         }
-	});
+    });
 }
 
 #[test]

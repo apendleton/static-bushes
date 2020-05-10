@@ -30,10 +30,10 @@ static COORDS: Lazy<Vec<u32>> = Lazy::new(|| vec![
 
 #[test]
 fn creates_an_index() {
-	// creates an index
+    // creates an index
     let mut builder = KDBushBuilder::new_with_node_size(10);
-	builder.extend(POINTS.iter());
-	let index = builder.finish();
+    builder.extend(POINTS.iter());
+    let index = builder.finish();
 
     assert_eq!(index.ids.iter().collect::<Vec<_>>(), IDS.iter().cloned().collect::<Vec<_>>(), "ids are kd-sorted");
     assert_eq!(index.coords, COORDS.iter().cloned().collect::<Vec<_>>(), "coords are kd-sorted");
@@ -41,10 +41,10 @@ fn creates_an_index() {
 
 #[test]
 fn range_search() {
-	// range search
+    // range search
     let mut builder = KDBushBuilder::new_with_node_size(10);
     builder.extend(POINTS.iter());
-	let index = builder.finish();
+    let index = builder.finish();
 
     let result: Vec<_> = index.range(20, 30, 50, 70).collect();
 
@@ -70,10 +70,10 @@ fn range_search() {
 
 #[test]
 fn radius_search() {
-	// radius search
+    // radius search
     let mut builder = KDBushBuilder::new_with_node_size(10);
-	builder.extend(POINTS.iter());
-	let index = builder.finish();
+    builder.extend(POINTS.iter());
+    let index = builder.finish();
 
     let qp = [50, 50];
     let r = 20;
