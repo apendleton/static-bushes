@@ -119,6 +119,30 @@ fn radius_search() {
     println!("outside points not in range");
 }
 
+#[test]
+fn exact_search() {
+    let mut builder = KDBushBuilder::new_with_node_size(10);
+    builder.extend(POINTS.iter());
+    // add some duplicates to make sure exact can pull back more than one thing
+    builder.extend(POINTS[..20].iter());
+    let index = builder.finish();
+
+    for (i, p) in POINTS.iter().enumerate() {
+        let mut results: Vec<_> = index.exact(p[0], p[1]).collect();
+        results.sort();
+        if i < 20 {
+            // there should be a dupe
+            assert_eq!(results, vec![i, 100 + i]);
+        } else {
+            assert_eq!(results, vec![i]);
+        }
+
+        let mut vec_results = index.exact_as_vec(p[0], p[1]);
+        vec_results.sort();
+        assert_eq!(results, vec_results);
+    }
+}
+
 fn sq_dist(a: [u32; 2], b: [u32; 2]) -> u32 {
     let dx = if a[0] > b[0] { a[0] - b[0] } else { b[0] - a[0] };
     let dy = if a[1] > b[1] { a[1] - b[1] } else { b[1] - a[1] };

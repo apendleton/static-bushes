@@ -114,6 +114,22 @@ fn point_benches(c: &mut Criterion) {
     });
 
     let mut cycle = SEARCH_POINTS_U32.iter().cycle();
+    c.bench_function("exact_exact_vec_kdbush_u32", |b| {
+        b.iter(|| {
+            let p = cycle.next().unwrap();
+            let _result: Vec<_> = KDBUSH_U32.exact_as_vec(p[0], p[1]);
+        })
+    });
+
+    let mut cycle = SEARCH_POINTS_F64.iter().cycle();
+    c.bench_function("exact_exact_vec_kdbush_f64", |b| {
+        b.iter(|| {
+            let p = cycle.next().unwrap();
+            let _result: Vec<_> = KDBUSH_F64.exact_as_vec(p[0], p[1]);
+        })
+    });
+
+    let mut cycle = SEARCH_POINTS_U32.iter().cycle();
     c.bench_function("exact_bbox_flatbush_u32", |b| {
         b.iter(|| {
             let p = cycle.next().unwrap();
