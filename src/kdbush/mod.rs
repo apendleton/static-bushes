@@ -5,8 +5,6 @@ use core::iter::FromIterator;
 
 use crate::util::IndexVec;
 
-#[cfg(test)]
-mod bench;
 mod exact;
 mod range;
 mod sort;

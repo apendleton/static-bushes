@@ -13,3 +13,8 @@ genawaiter = "0.99.1"
 [dev-dependencies]
 once_cell = "1.3.1"
 rand = "0.7.3"
+criterion = "0.3.3"
+
+[[bench]]
+name = "benches"
+harness = false

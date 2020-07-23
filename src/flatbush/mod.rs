@@ -6,8 +6,6 @@ use core::iter::FromIterator;
 use crate::util::IndexVec;
 
 #[cfg(test)]
-mod bench;
-#[cfg(test)]
 mod test;
 
 pub trait AllowedNumber: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero
