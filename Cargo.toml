@@ -1,7 +1,12 @@
 [package]
 name = "static-bushes"
 version = "0.1.1"
+description = "Rust ports of the kdbush and flatbush npm packages"
+repository = "https://github.com/apendleton/static-bushes"
 authors = ["Vladimir Agafonkin <agafonkin@gmail.com>", "Andrew Pendleton <andrew@mapbox.com>"]
+keywords = ["geo", "geospatial"]
+readme = "README.md"
+license = "ISC"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
