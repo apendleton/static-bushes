@@ -135,8 +135,8 @@ impl<T: AllowedNumber> FlatBushBuilder<T> {
 
         let (bush_min_x, bush_min_y, bush_max_x, bush_max_y) =
             (self.min_x.as_(), self.min_y.as_(), self.max_x.as_(), self.max_y.as_());
-        let width: f64 = bush_max_x - bush_min_x;
-        let height: f64 = bush_max_y - bush_min_y;
+        let width: f64 = if bush_max_x == bush_min_x { 1. } else { bush_max_x - bush_min_x };
+        let height: f64 = if bush_max_y == bush_min_y { 1. } else { bush_max_y - bush_min_y };
 
         let hilbert_max = ((1 << 16) - 1) as f64;
         // map item centers into Hilbert coordinate space and calculate Hilbert values
