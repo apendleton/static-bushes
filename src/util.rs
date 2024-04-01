@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum IndexVec {
     U16(Vec<u16>),
     U32(Vec<u32>),

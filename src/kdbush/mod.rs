@@ -20,12 +20,14 @@ where
 
 impl<T> AllowedNumber for T where T: PartialOrd + NumOps + Copy {}
 
+#[derive(Clone)]
 pub struct KDBush<T: AllowedNumber> {
     node_size: usize,
     coords: Vec<T>,
     ids: IndexVec,
 }
 
+#[derive(Clone)]
 pub struct KDBushBuilder<T: AllowedNumber> {
     node_size: usize,
     coords: Vec<T>,

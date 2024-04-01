@@ -16,6 +16,7 @@ where
 
 impl<T> AllowedNumber for T where T: PartialOrd + NumOps + AsPrimitive<f64> + Bounded + Zero {}
 
+#[derive(Clone)]
 pub struct FlatBush<T: AllowedNumber> {
     boxes: Vec<T>,
     indices: IndexVec,
@@ -28,6 +29,7 @@ pub struct FlatBush<T: AllowedNumber> {
     max_y: T,
 }
 
+#[derive(Clone)]
 pub struct FlatBushBuilder<T: AllowedNumber> {
     boxes: Vec<T>,
     node_size: usize,

@@ -1,6 +1,6 @@
 [package]
 name = "static-bushes"
-version = "0.1.1"
+version = "0.1.2"
 description = "Rust ports of the kdbush and flatbush npm packages"
 repository = "https://github.com/apendleton/static-bushes"
 authors = ["Vladimir Agafonkin <agafonkin@gmail.com>", "Andrew Pendleton <andrew@andrewpendleton.net>"]
