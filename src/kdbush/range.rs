@@ -10,7 +10,11 @@ impl<T: AllowedNumber> KDBush<T> {
         max_x: T,
         max_y: T,
     ) -> impl Iterator<Item = usize> + 'a {
-        let mut stack = vec![0, self.ids.len() - 1, 0];
+        let mut stack = if self.ids.len() > 0 {
+            vec![0, self.ids.len() - 1, 0]
+        } else {
+            vec![]
+        };
 
         Gen::new(|co| async move {
             // recursively search for items in range in the kd-sorted arrays

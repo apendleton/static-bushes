@@ -4,7 +4,11 @@ use genawaiter::rc::Gen;
 
 impl<T: AllowedNumber> KDBush<T> {
     pub fn search_within<'a>(&'a self, qx: T, qy: T, r: T) -> impl Iterator<Item = usize> + 'a {
-        let mut stack = vec![0, self.ids.len() - 1, 0];
+        let mut stack = if self.ids.len() > 0 {
+            vec![0, self.ids.len() - 1, 0]
+        } else {
+            vec![]
+        };
         let r2 = r * r;
 
         Gen::new(|co| async move {

@@ -86,6 +86,21 @@ impl<T: AllowedNumber> FlatBushBuilder<T> {
     }
 
     pub fn finish(mut self) -> FlatBush<T> {
+        if self.boxes.len() == 0 {
+            // this is an empty index; early-return so we don't crash
+            return FlatBush {
+                boxes: self.boxes,
+                indices: IndexVec::U16(vec![]),
+                level_bounds: Vec::new(),
+                num_items: 0,
+                node_size: self.node_size,
+                min_x: self.min_x,
+                min_y: self.min_y,
+                max_x: self.max_x,
+                max_y: self.max_y,
+            };
+        }
+
         let num_items = self.boxes.len() >> 2;
 
         // calculate the total number of nodes in the R-tree to allocate space for
@@ -222,7 +237,12 @@ impl<T: AllowedNumber> FlatBush<T> {
         max_x: T,
         max_y: T,
     ) -> impl Iterator<Item = usize> + 'a {
-        let mut queue: Vec<usize> = vec![self.boxes.len() - 4];
+        let mut queue: Vec<usize> = if self.boxes.len() > 0 {
+            vec![self.boxes.len() - 4]
+        } else {
+            vec![]
+        };
+
         let mut pos = usize::MAX;
         let mut node_index = 0;
         let mut end: usize = 0;
