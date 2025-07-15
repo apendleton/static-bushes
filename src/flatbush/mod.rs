@@ -237,11 +237,8 @@ impl<T: AllowedNumber> FlatBush<T> {
         max_x: T,
         max_y: T,
     ) -> impl Iterator<Item = usize> + 'a {
-        let mut queue: Vec<usize> = if self.boxes.len() > 0 {
-            vec![self.boxes.len() - 4]
-        } else {
-            vec![]
-        };
+        let mut queue: Vec<usize> =
+            if self.boxes.len() > 0 { vec![self.boxes.len() - 4] } else { vec![] };
 
         let mut pos = usize::MAX;
         let mut node_index = 0;
