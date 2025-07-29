@@ -4,7 +4,7 @@ use genawaiter::rc::Gen;
 
 impl<T: AllowedNumber> KDBush<T> {
     pub fn exact<'a>(&'a self, qx: T, qy: T) -> impl Iterator<Item = usize> + 'a {
-        let mut stack = vec![0, self.ids.len() - 1, 0];
+        let mut stack = if self.ids.len() > 0 { vec![0, self.ids.len() - 1, 0] } else { vec![] };
 
         Gen::new(|co| async move {
             // recursively search for items in range in the kd-sorted arrays
@@ -55,7 +55,7 @@ impl<T: AllowedNumber> KDBush<T> {
     }
 
     pub fn exact_as_vec(&self, qx: T, qy: T) -> Vec<usize> {
-        let mut stack = vec![0, self.ids.len() - 1, 0];
+        let mut stack = if self.ids.len() > 0 { vec![0, self.ids.len() - 1, 0] } else { vec![] };
         let mut results: Vec<usize> = Vec::new();
 
         // recursively search for items in range in the kd-sorted arrays

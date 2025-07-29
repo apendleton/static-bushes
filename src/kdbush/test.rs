@@ -143,6 +143,24 @@ fn exact_search() {
     }
 }
 
+#[test]
+fn dont_freak_out_on_empty_structures() {
+    let data: Vec<[f64; 2]> = Vec::new();
+    let index: KDBush<_> = data.into_iter().collect();
+
+    let ids: Vec<_> = index.search_range(-60.0, -60.0, -40.0, -40.0).collect();
+    assert_eq!(ids.len(), 0);
+
+    let ids: Vec<_> = index.exact(-60.0, -60.0).collect();
+    assert_eq!(ids.len(), 0);
+
+    let ids: Vec<_> = index.exact_as_vec(-60.0, -60.0);
+    assert_eq!(ids.len(), 0);
+
+    let ids: Vec<_> = index.search_within(-60.0, -60.0, 20.0).collect();
+    assert_eq!(ids.len(), 0);
+}
+
 fn sq_dist(a: [u32; 2], b: [u32; 2]) -> u32 {
     let dx = if a[0] > b[0] { a[0] - b[0] } else { b[0] - a[0] };
     let dy = if a[1] > b[1] { a[1] - b[1] } else { b[1] - a[1] };

@@ -166,3 +166,12 @@ fn returns_index_of_newly_added_rectangle() {
     let expected_sequence: Vec<usize> = (0..5).collect();
     assert_eq!(ids, expected_sequence);
 }
+
+#[test]
+fn dont_freak_out_on_empty_structures() {
+    let data: Vec<[f64; 4]> = Vec::new();
+    let index: FlatBush<_> = data.into_iter().collect();
+
+    let ids: Vec<_> = index.search_range(-60.0, -60.0, -40.0, -40.0).collect();
+    assert_eq!(ids.len(), 0);
+}

@@ -62,7 +62,9 @@ impl<T: AllowedNumber> KDBushBuilder<T> {
         };
 
         // kd-sort both arrays for efficient search (see comments in sort.js)
-        sort::sort_kd(&mut ids, &mut self.coords, self.node_size, 0, num_points - 1, 0);
+        if num_points > 0 {
+            sort::sort_kd(&mut ids, &mut self.coords, self.node_size, 0, num_points - 1, 0);
+        }
 
         KDBush { node_size: self.node_size, coords: self.coords, ids }
     }
